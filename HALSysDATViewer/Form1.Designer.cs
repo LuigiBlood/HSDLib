@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.glControl = new OpenTK.GLControl();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -40,6 +41,9 @@
             this.exportDATToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.trackBar1 = new System.Windows.Forms.TrackBar();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.importSMDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -47,6 +51,7 @@
             this.menuStrip1.SuspendLayout();
             this.groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -134,7 +139,8 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openDATToolStripMenuItem,
-            this.exportDATToolStripMenuItem});
+            this.exportDATToolStripMenuItem,
+            this.toolStripMenuItem1});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
@@ -143,7 +149,7 @@
             // 
             this.openDATToolStripMenuItem.Name = "openDATToolStripMenuItem";
             this.openDATToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openDATToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.openDATToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openDATToolStripMenuItem.Text = "Open DAT";
             this.openDATToolStripMenuItem.Click += new System.EventHandler(this.openDATToolStripMenuItem_Click);
             // 
@@ -151,7 +157,7 @@
             // 
             this.exportDATToolStripMenuItem.Name = "exportDATToolStripMenuItem";
             this.exportDATToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.exportDATToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.exportDATToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exportDATToolStripMenuItem.Text = "Export DAT";
             this.exportDATToolStripMenuItem.Click += new System.EventHandler(this.exportDATToolStripMenuItem_Click);
             // 
@@ -177,6 +183,27 @@
             this.trackBar1.TabIndex = 0;
             this.trackBar1.ValueChanged += new System.EventHandler(this.trackBar1_ValueChanged);
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.importSMDToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(148, 26);
+            // 
+            // importSMDToolStripMenuItem
+            // 
+            this.importSMDToolStripMenuItem.Name = "importSMDToolStripMenuItem";
+            this.importSMDToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.importSMDToolStripMenuItem.Text = "Import SMD...";
+            this.importSMDToolStripMenuItem.Click += new System.EventHandler(this.importSMDToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItem1.Text = "Import SMD...";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.importSMDToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -200,6 +227,7 @@
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -219,6 +247,9 @@
         private System.Windows.Forms.ToolStripMenuItem exportDATToolStripMenuItem;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.TrackBar trackBar1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem importSMDToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
     }
 }
 

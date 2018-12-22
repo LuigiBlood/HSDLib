@@ -14,6 +14,7 @@ using HALSysDATViewer.Nodes;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using HALSysDATViewer.Rendering;
+using HALSysDATViewer.Modeling;
 
 namespace HALSysDATViewer
 {
@@ -58,6 +59,7 @@ namespace HALSysDATViewer
                     new Node_JOBJ((HSD_JOBJ)root.Node, n);
 
                 Node_Generic generic = new Node_Generic(root.Node);
+                generic.ContextMenuStrip = contextMenuStrip1;
                 nodeTree.Nodes.Add(generic);
                 generic.Open();
             }
@@ -85,6 +87,25 @@ namespace HALSysDATViewer
                     HSD_JOBJ j = (HSD_JOBJ)Node;
                     if (j.Flags.HasFlag(JOBJ_FLAG.SKELETON_ROOT) || j.Flags.HasFlag(JOBJ_FLAG.ROOT_OPA))
                         Renderer.RootNode = j;
+
+                    using (OpenFileDialog ofd = new OpenFileDialog())
+                    {
+                        ofd.Filter = "SMD|*.smd";
+
+                        if (ofd.ShowDialog() == DialogResult.OK)
+                        {
+                            //OpenDAT(ofd.FileName);
+
+                            //if (nodeTree.SelectedNode is Node_JOBJ)
+                            {
+                                SMD s = new SMD(ofd.FileName);
+                                j = s.RootJOBJ;
+
+                                Node = s.RootJOBJ;
+                                Renderer.RootNode = j;
+                            }
+                        }
+                    }
                 }
                 if (Node is HSD_FigaTree)
                 {
@@ -210,6 +231,25 @@ namespace HALSysDATViewer
         private void trackBar1_ValueChanged(object sender, EventArgs e)
         {
             Renderer.SetFrame(trackBar1.Value);
+        }
+
+        private void importSMDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                ofd.Filter = "SMD|*.smd";
+
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    //OpenDAT(ofd.FileName);
+
+                    //if (nodeTree.SelectedNode is Node_JOBJ)
+                    {
+                        SMD s = new SMD(ofd.FileName);
+                        //HSD_JOBJ j = ((Node_JOBJ)nodeTree.SelectedNode).JOBJ;
+                    }
+                }
+            }
         }
     }
 }

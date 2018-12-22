@@ -23,6 +23,8 @@ namespace HSDLib.KAR
     }
 
 
+    //--------- Main Model
+
     public class KAR_GrMainModel : IHSDNode
     {
         [FieldData(typeof(HSD_JOBJ))]
@@ -303,6 +305,9 @@ namespace HSDLib.KAR
         public ushort Unk { get; set; }
     }
 
+
+    //--------- Skybox Model
+
     public class KAR_GrSkyboxModel : IHSDNode
     {
         [FieldData(typeof(HSD_JOBJ))]
@@ -312,6 +317,8 @@ namespace HSDLib.KAR
         public uint Unknown { get; set; }
     }
 
+
+    //--------- Unk2
 
     public class KAR_GrUnk2Model : IHSDNode
     {
@@ -443,6 +450,9 @@ namespace HSDLib.KAR
             Writer.Write((ushort)0);
         }
     }
+
+
+    //--------- Unk3
 
     public class KAR_GrUnk3Model : IHSDNode
     {

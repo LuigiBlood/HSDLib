@@ -10,6 +10,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using OpenTK.Graphics.OpenGL;
 using HSDLib.Helpers.TriangleConverter;
+using System.Globalization;
 
 namespace HALSysDATViewer.Modeling
 {
@@ -92,12 +93,12 @@ namespace HALSysDATViewer.Modeling
                         {
                             HSD_JOBJ b = BoneList[int.Parse(args[0])];
                             b.Transforms = new HSD_Transforms();
-                            b.Transforms.TX = float.Parse(args[1]);
-                            b.Transforms.TY = float.Parse(args[2]);
-                            b.Transforms.TZ = float.Parse(args[3]);
-                            b.Transforms.RX = float.Parse(args[4]);
-                            b.Transforms.RY = float.Parse(args[5]);
-                            b.Transforms.RZ = float.Parse(args[6]);
+                            b.Transforms.TX = float.Parse(args[1], CultureInfo.InvariantCulture);
+                            b.Transforms.TY = float.Parse(args[2], CultureInfo.InvariantCulture);
+                            b.Transforms.TZ = float.Parse(args[3], CultureInfo.InvariantCulture);
+                            b.Transforms.RX = float.Parse(args[4], CultureInfo.InvariantCulture);
+                            b.Transforms.RY = float.Parse(args[5], CultureInfo.InvariantCulture);
+                            b.Transforms.RZ = float.Parse(args[6], CultureInfo.InvariantCulture);
                             b.Transforms.SX = 1f;
                             b.Transforms.SY = 1f;
                             b.Transforms.SZ = 1f;
@@ -124,9 +125,9 @@ namespace HALSysDATViewer.Modeling
 
                         int parent = int.Parse(args[0]);
                         GXVertex vert = new GXVertex();
-                        vert.Pos = new GXVector3(float.Parse(args[1]), float.Parse(args[2]), float.Parse(args[3]));
-                        vert.Nrm = new GXVector3(float.Parse(args[4]), float.Parse(args[5]), float.Parse(args[6]));
-                        vert.TEX0 = new GXVector2(float.Parse(args[7]), float.Parse(args[8]));
+                        vert.Pos = new GXVector3(float.Parse(args[1], CultureInfo.InvariantCulture), float.Parse(args[2], CultureInfo.InvariantCulture), float.Parse(args[3], CultureInfo.InvariantCulture));
+                        vert.Nrm = new GXVector3(float.Parse(args[4], CultureInfo.InvariantCulture), float.Parse(args[5], CultureInfo.InvariantCulture), float.Parse(args[6], CultureInfo.InvariantCulture));
+                        vert.TEX0 = new GXVector2(float.Parse(args[7], CultureInfo.InvariantCulture), float.Parse(args[8], CultureInfo.InvariantCulture));
                         if (args.Length > 9)
                         {
                             // eww, gross, please fix later
@@ -155,6 +156,164 @@ namespace HALSysDATViewer.Modeling
                             case 2: t.v3 = vert; break;
                         }
                     }
+                }
+            }
+
+            // Steps:
+            // 1 - Get all vertices
+            // 2 - Use GroupPrimitives
+            // 3 - Use the list to make the DisplayList
+            // 4 - Done
+
+            TriangleConverter converter = new TriangleConverter(true, 52, 2, true);
+
+            int newPointCount = 0;
+            int newFaceCount = 0;
+
+            HSD_POBJ poly = new HSD_POBJ();
+            HSD_DOBJ display = new HSD_DOBJ();
+
+            GXVertex[] Vertices = this.GetVertices();
+
+            List<PrimitiveGroup> _primGroups = converter.GroupPrimitives(Vertices, out newPointCount, out newFaceCount);
+            List<GXPrimitiveGroup> Primitives = new List<GXPrimitiveGroup>();
+            HSD_AttributeGroup Attributes = new HSD_AttributeGroup();
+
+            GXDisplayList dl = new GXDisplayList();
+
+            foreach (PrimitiveGroup g in _primGroups)
+            {
+                if (g._triangles.Count != 0)
+                {
+                    GXPrimitiveGroup p = new GXPrimitiveGroup();
+                    p.PrimitiveType = GXPrimitiveType.Triangles;
+                    p.Count = (ushort)g._triangles.Count;
+                    p.Indices = new GXIndexGroup[p.Count * 3];
+                    ushort idx = 0;
+
+                    GXVertexBuffer vPos = new GXVertexBuffer();
+                    GXVertexBuffer vNrm = new GXVertexBuffer();
+                    GXVertexBuffer vTex = new GXVertexBuffer();
+
+                    vPos.Name = GXAttribName.GX_VA_POS;
+                    vPos.AttributeType = GXAttribType.GX_INDEX16;
+                    vPos.CompCount = GXCompCnt.PosXYZ;
+                    vPos.CompType = GXCompType.Float;
+                    vPos.Scale = 0;
+                    vPos.Stride = 4 * 3;
+
+                    vNrm.Name = GXAttribName.GX_VA_NRM;
+                    vNrm.AttributeType = GXAttribType.GX_INDEX16;
+                    vNrm.CompCount = GXCompCnt.NrmXYZ;
+                    vNrm.CompType = GXCompType.Float;
+                    vNrm.Scale = 0;
+                    vNrm.Stride = 4 * 3;
+
+                    vTex.Name = GXAttribName.GX_VA_TEX0;
+                    vTex.AttributeType = GXAttribType.GX_INDEX16;
+                    vTex.CompCount = GXCompCnt.TexST;
+                    vTex.CompType = GXCompType.Float;
+                    vTex.Scale = 0;
+                    vTex.Stride = 4 * 2;
+
+                    List<float> vPosArray = new List<float>();
+                    List<float> vNrmArray = new List<float>();
+                    List<float> vTexArray = new List<float>();
+
+                    foreach (GXVertex v in Vertices)
+                    {
+                        vPosArray.Add(v.Pos.X);
+                        vPosArray.Add(v.Pos.Y);
+                        vPosArray.Add(v.Pos.Z);
+
+                        vNrmArray.Add(v.Nrm.X);
+                        vNrmArray.Add(v.Nrm.Y);
+                        vNrmArray.Add(v.Nrm.Z);
+
+                        vTexArray.Add(v.TEX0.X);
+                        vTexArray.Add(v.TEX0.Y);
+                    }
+
+                    foreach (PointTriangle point in g._triangles)
+                    {
+                        p.Indices[idx] = new GXIndexGroup();
+                        p.Indices[idx].Indices = new ushort[3];
+                        p.Indices[idx].Indices[0] = (ushort)Array.IndexOf(Vertices, point._x);
+                        p.Indices[idx].Indices[1] = (ushort)Array.IndexOf(Vertices, point._x);
+                        p.Indices[idx].Indices[2] = (ushort)Array.IndexOf(Vertices, point._x);
+
+                        idx++;
+                        p.Indices[idx] = new GXIndexGroup();
+                        p.Indices[idx].Indices = new ushort[3];
+                        p.Indices[idx].Indices[0] = (ushort)Array.IndexOf(Vertices, point._y);
+                        p.Indices[idx].Indices[1] = (ushort)Array.IndexOf(Vertices, point._y);
+                        p.Indices[idx].Indices[2] = (ushort)Array.IndexOf(Vertices, point._y);
+
+                        idx++;
+                        p.Indices[idx] = new GXIndexGroup();
+                        p.Indices[idx].Indices = new ushort[3];
+                        p.Indices[idx].Indices[0] = (ushort)Array.IndexOf(Vertices, point._z);
+                        p.Indices[idx].Indices[1] = (ushort)Array.IndexOf(Vertices, point._z);
+                        p.Indices[idx].Indices[2] = (ushort)Array.IndexOf(Vertices, point._z);
+
+                        idx++;
+                    }
+                    Primitives.Add(p);
+
+                    //Convert
+                    List<byte> byteArray = new List<byte>();
+                    foreach (float f in vPosArray)
+                    {
+                        byteArray.Add(BitConverter.GetBytes(f)[3]);
+                        byteArray.Add(BitConverter.GetBytes(f)[2]);
+                        byteArray.Add(BitConverter.GetBytes(f)[1]);
+                        byteArray.Add(BitConverter.GetBytes(f)[0]);
+                    }
+                    vPos.DataBuffer = byteArray.ToArray();
+
+                    byteArray.Clear();
+                    foreach (float f in vNrmArray)
+                    {
+                        byteArray.Add(BitConverter.GetBytes(f)[3]);
+                        byteArray.Add(BitConverter.GetBytes(f)[2]);
+                        byteArray.Add(BitConverter.GetBytes(f)[1]);
+                        byteArray.Add(BitConverter.GetBytes(f)[0]);
+                    }
+                    vNrm.DataBuffer = byteArray.ToArray();
+
+                    byteArray.Clear();
+                    foreach (float f in vTexArray)
+                    {
+                        byteArray.Add(BitConverter.GetBytes(f)[3]);
+                        byteArray.Add(BitConverter.GetBytes(f)[2]);
+                        byteArray.Add(BitConverter.GetBytes(f)[1]);
+                        byteArray.Add(BitConverter.GetBytes(f)[0]);
+                    }
+                    vTex.DataBuffer = byteArray.ToArray();
+
+                    Attributes.Attributes.Add(vPos);
+                    Attributes.Attributes.Add(vNrm);
+                    Attributes.Attributes.Add(vTex);
+
+                    poly.VertexAttributes = Attributes;
+                    dl.Primitives = Primitives;
+                    poly.DisplayListBuffer = dl.ToBuffer(Attributes);
+                    display.POBJ = poly;
+
+                    HSD_MOBJ m = new HSD_MOBJ();
+                    m.RenderFlags = RENDER_MODE.DIFFUSE;
+                    m.MaterialColor = new HSD_MCOBJ();
+                    m.MaterialColor.Alpha = 255;
+                    m.MaterialColor.DIF_A = 255;
+                    m.MaterialColor.DIF_R = 255;
+                    m.MaterialColor.DIF_G = 255;
+                    m.MaterialColor.DIF_B = 255;
+                    m.MaterialColor.AMB_A = 255;
+                    m.MaterialColor.AMB_R = 255;
+                    m.MaterialColor.AMB_G = 255;
+                    m.MaterialColor.AMB_B = 255;
+                    display.MOBJ = m;
+                    RootJOBJ.DOBJ = display;
                 }
             }
         }
