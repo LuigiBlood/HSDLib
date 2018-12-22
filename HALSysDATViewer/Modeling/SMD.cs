@@ -47,6 +47,7 @@ namespace HALSysDATViewer.Modeling
             Triangles = new List<SMDTriangle>();
             Dictionary<int, HSD_JOBJ> BoneList = new Dictionary<int, HSD_JOBJ>();
             Dictionary<int, List<SMDTriangle>> TriList = new Dictionary<int, List<SMDTriangle>>();
+            List<int> RootList = new List<int>();
 
             int time = 0;
 
@@ -73,9 +74,9 @@ namespace HALSysDATViewer.Modeling
                     int ParentIndex = int.Parse(args[s]);
                     if (ParentIndex == -1)
                     {
-
-                        RootJOBJ = b;
-                        RootJOBJ.Flags |= JOBJ_FLAG.SKELETON_ROOT;
+                        RootList.Add(id);
+                        //RootJOBJ = b;
+                        b.Flags |= JOBJ_FLAG.SKELETON_ROOT;
                     }
                     else
                     {
@@ -105,7 +106,7 @@ namespace HALSysDATViewer.Modeling
                             b.Transforms.SZ = 1f;
                         }
                     }
-                    JOBJBoneList = RootJOBJ.DepthFirstList;
+                    //JOBJBoneList = RootJOBJ.DepthFirstList;
                 }
 
                 if (current.Equals("triangles"))
@@ -350,6 +351,12 @@ namespace HALSysDATViewer.Modeling
             }
 
             //Process RootJOBJ here
+            if (RootList.Count == 1)
+            {
+                RootJOBJ = BoneList[RootList[0]];
+            }
+
+            //There may be a case of more than one root bones, but we won't do anything about it yet
         }
 
         public GXVertex[] GetVertices()
