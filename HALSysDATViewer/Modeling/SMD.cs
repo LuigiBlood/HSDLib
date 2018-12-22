@@ -119,6 +119,7 @@ namespace HALSysDATViewer.Modeling
                     Triangles.Add(t);
                     t.Material = meshName;
 
+                    List<SMDTriangle> SMDTriList = new List<SMDTriangle>();
                     for (int j = 0; j < 3; j++)
                     {
                         line = reader.ReadLine();
@@ -126,7 +127,7 @@ namespace HALSysDATViewer.Modeling
                         args = line.Replace(";", "").TrimStart().Split(' ');
 
                         int parent = int.Parse(args[0]);
-                        List<SMDTriangle> SMDTriList;
+                        
                         if (!TriList.Keys.Contains(parent))
                         {
                             SMDTriList = new List<SMDTriangle>();
@@ -136,7 +137,6 @@ namespace HALSysDATViewer.Modeling
                         {
                             SMDTriList = TriList[parent];
                         }
-                        SMDTriList.Add(t);
 
                         GXVertex vert = new GXVertex();
                         vert.Pos = new GXVector3(float.Parse(args[1], CultureInfo.InvariantCulture), float.Parse(args[2], CultureInfo.InvariantCulture), float.Parse(args[3], CultureInfo.InvariantCulture));
@@ -170,6 +170,7 @@ namespace HALSysDATViewer.Modeling
                             case 2: t.v3 = vert; break;
                         }
                     }
+                    SMDTriList.Add(t);
                 }
             }
 
@@ -357,6 +358,8 @@ namespace HALSysDATViewer.Modeling
             }
 
             //There may be a case of more than one root bones, but we won't do anything about it yet
+
+            reader.Close();
         }
 
         public GXVertex[] GetVertices()
