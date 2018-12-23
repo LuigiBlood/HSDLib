@@ -56,7 +56,7 @@ namespace HSDLib.Animation
 
         public override void Save(HSDWriter Writer)
         {
-            if (MatAnimJoint == null)
+            if (MatAnimJoint != null)
                 Writer.WriteObject(MatAnimJoint);
 
             foreach (HSD_AnimNode node in Nodes)
