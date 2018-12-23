@@ -183,7 +183,7 @@ namespace HALSysDATViewer.Modeling
             //Process each joint seperately
             foreach (int id in TriList.Keys)
             {
-                TriangleConverter triConverter = new TriangleConverter(false, 52, 2, true);
+                TriangleConverter triConverter = new TriangleConverter(true, 52, 2, true);
                 int newTriPointCount = 0;
                 int newTriFaceCount = 0;
 
@@ -313,7 +313,7 @@ namespace HALSysDATViewer.Modeling
                         GXPrimitiveGroup p = new GXPrimitiveGroup();
                         p.PrimitiveType = GXPrimitiveType.Triangles;
                         p.Count = (ushort)g._triangles.Count;
-                        p.Indices = new GXIndexGroup[p.Count * 3];
+                        p.Indices = new GXIndexGroup[p.Count * _attr.Attributes.Count];
                         ushort idx = 0;
 
                         //convert each Primitive to proper GX Primitive
@@ -322,10 +322,9 @@ namespace HALSysDATViewer.Modeling
                             foreach (GXVertex _vtx in point.Points)
                             {
                                 p.Indices[idx] = new GXIndexGroup();
-                                p.Indices[idx].Indices = new ushort[3];
-                                p.Indices[idx].Indices[0] = (ushort)Array.IndexOf(vertexList.ToArray(), _vtx);
-                                p.Indices[idx].Indices[1] = (ushort)Array.IndexOf(vertexList.ToArray(), _vtx);
-                                p.Indices[idx].Indices[2] = (ushort)Array.IndexOf(vertexList.ToArray(), _vtx);
+                                p.Indices[idx].Indices = new ushort[_attr.Attributes.Count];
+                                for (int i = 0; i < _attr.Attributes.Count; i++)
+                                    p.Indices[idx].Indices[i] = (ushort)Array.IndexOf(vertexList.ToArray(), _vtx);
                                 idx++;
                             }
                         }
@@ -334,27 +333,24 @@ namespace HALSysDATViewer.Modeling
 
                     if (g._tristrips.Count != 0)
                     {
-                        //Not working properly
-                        GXPrimitiveGroup p = new GXPrimitiveGroup();
-                        p.PrimitiveType = GXPrimitiveType.TriangleStrip;
-                        List<GXIndexGroup> _indices = new List<GXIndexGroup>();
-
-                        //convert each Primitive to proper GX Primitive
+                        //Convert each Primitive to proper GX Primitive
                         foreach (PointTriangleStrip point in g._tristrips)
                         {
+                            GXPrimitiveGroup p = new GXPrimitiveGroup();
+                            p.PrimitiveType = GXPrimitiveType.TriangleStrip;
+                            List<GXIndexGroup> _indices = new List<GXIndexGroup>();
                             foreach (GXVertex _vtx in point.Points)
                             {
                                 GXIndexGroup _indice = new GXIndexGroup();
-                                _indice.Indices = new ushort[3];
-                                _indice.Indices[0] = (ushort)Array.IndexOf(vertexList.ToArray(), _vtx);
-                                _indice.Indices[1] = (ushort)Array.IndexOf(vertexList.ToArray(), _vtx);
-                                _indice.Indices[2] = (ushort)Array.IndexOf(vertexList.ToArray(), _vtx);
+                                _indice.Indices = new ushort[_attr.Attributes.Count];
+                                for (int i = 0; i < _attr.Attributes.Count; i++)
+                                    _indice.Indices[i] = (ushort)Array.IndexOf(vertexList.ToArray(), _vtx);
                                 _indices.Add(_indice);
                             }
+                            p.Indices = _indices.ToArray();
+                            p.Count = (ushort)(_indices.Count / _attr.Attributes.Count);
+                            _prim.Add(p);
                         }
-                        p.Indices = _indices.ToArray();
-                        p.Count = (ushort)(_indices.Count / 3);
-                        _prim.Add(p);
                     }
                 }
                 _poly.VertexAttributes = _attr;
