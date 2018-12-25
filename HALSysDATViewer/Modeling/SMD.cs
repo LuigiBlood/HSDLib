@@ -42,16 +42,19 @@ namespace HALSysDATViewer.Modeling
             string line;
 
             string current = "";
+            string previous = "";
 
             RootJOBJ = new HSD_JOBJ();
             Triangles = new List<SMDTriangle>();
             Dictionary<int, HSD_JOBJ> BoneList = new Dictionary<int, HSD_JOBJ>();
             Dictionary<int, List<SMDTriangle>> TriList = new Dictionary<int, List<SMDTriangle>>();
+            Dictionary<int, int> ParentBoneList = new Dictionary<int, int>();
+
             List<int> RootList = new List<int>();
 
             int time = 0;
 
-            List<HSD_JOBJ> JOBJBoneList;
+            //List<HSD_JOBJ> JOBJBoneList;
             while ((line = reader.ReadLine()) != null)
             {
                 line = Regex.Replace(line, @"\s+", " ");
@@ -59,7 +62,22 @@ namespace HALSysDATViewer.Modeling
 
                 if (args[0].Equals("triangles") || args[0].Equals("end") || args[0].Equals("skeleton") || args[0].Equals("nodes"))
                 {
+                    previous = current;
                     current = args[0];
+
+                    if (current.Equals("end") && previous.Equals("nodes"))
+                    {
+                        foreach (KeyValuePair<int, int> bone in ParentBoneList)
+                        {
+                            int id = bone.Key;
+                            int ParentIndex = bone.Value;
+                            if (ParentIndex != -1)
+                            {
+                                BoneList[ParentIndex].AddChild(BoneList[id]);
+                            }
+                        }
+                    }
+
                     continue;
                 }
 
@@ -72,15 +90,12 @@ namespace HALSysDATViewer.Modeling
                     while (args[s].Contains("\""))
                         s++;
                     int ParentIndex = int.Parse(args[s]);
+                    ParentBoneList.Add(id, ParentIndex);
                     if (ParentIndex == -1)
                     {
                         RootList.Add(id);
                         //RootJOBJ = b;
-                        b.Flags |= JOBJ_FLAG.SKELETON_ROOT;
-                    }
-                    else
-                    {
-                        BoneList[ParentIndex].AddChild(b);
+                        b.Flags |= JOBJ_FLAG.SKELETON_ROOT | JOBJ_FLAG.CLASSICAL_SCALING | JOBJ_FLAG.ROOT_OPA | JOBJ_FLAG.ROOT_XLU | JOBJ_FLAG.ROOT_TEXEDGE;
                     }
                     BoneList.Add(id, b);
                 }
@@ -145,6 +160,7 @@ namespace HALSysDATViewer.Modeling
                         if (args.Length > 9)
                         {
                             // eww, gross, please fix later
+                            /*
                             int wCount = int.Parse(args[9]);
                             int w = 10;
                             HSD_JOBJWeight bw = new HSD_JOBJWeight();
@@ -162,6 +178,7 @@ namespace HALSysDATViewer.Modeling
                                 BoneWeightList.Add(bw);
                             }
                             vert.PMXID = (ushort)(mtxid * 3);
+                            */
                         }
                         switch (j)
                         {
@@ -200,11 +217,103 @@ namespace HALSysDATViewer.Modeling
                 HSD_DOBJ _display = new HSD_DOBJ();
                 HSD_MOBJ _mat = new HSD_MOBJ()
                 {
-                    RenderFlags = RENDER_MODE.DIFFUSE | RENDER_MODE.DIFFSE_BOTH,
+                    RenderFlags = RENDER_MODE.ALPHA_COMPAT | RENDER_MODE.DIFFSE_MAT | RENDER_MODE.TEX0 | RENDER_MODE.XLU,
+
+                    Textures = new HSD_TOBJ()
+                    {
+                        TexMapID = GXTexMapID.GX_TEXMAP0,
+                        GXTexGenSrc = 4,
+                        Transform = new HSD_Transforms()
+                        {
+                            RX = 0,
+                            RY = 0,
+                            RZ = 0,
+                            SX = 1,
+                            SY = 1,
+                            SZ = 1,
+                            TX = 0,
+                            TY = 0,
+                            TZ = 0,
+                        },
+                        WrapS = GXWrapMode.REPEAT,
+                        WrapT = GXWrapMode.REPEAT,
+                        WScale = 1,
+                        HScale = 1,
+                        Flags = TOBJ_FLAGS.COORD_UV | TOBJ_FLAGS.LIGHTMAP_DIFFUSE | TOBJ_FLAGS.COLORMAP_ADD,
+                        Blending = 1,
+                        MagFilter = GXTexFilter.GX_LINEAR,
+                        ImageData = new HSD_Image()
+                        {
+                            Width = 16,
+                            Height = 16,
+                            Format = GXTexFmt.RGB565,
+                            Mipmap = 1,
+                            MaxLOD = 1,
+                            MinLOD = 0,
+
+                            Data = new byte[]
+                            {
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                            },
+                        },
+                    },
 
                     MaterialColor = new HSD_MCOBJ()
                     {
-                        Alpha = 255,
+                        Alpha = 1f,
+                        Shininess = 1f,
+
+                        SPC_A = 255,
+                        SPC_R = 255,
+                        SPC_G = 255,
+                        SPC_B = 255,
+
                         DIF_A = 255,
                         DIF_R = 255,
                         DIF_G = 255,
@@ -223,6 +332,19 @@ namespace HALSysDATViewer.Modeling
                 GXDisplayList _dlist = new GXDisplayList();
 
                 //--Manage Vertices
+                //Optimize Vertices
+
+                vertexList.Clear();
+                foreach (SMDTriangle SMDTri in TriList[id])
+                {
+                    if (!vertexList.Contains(SMDTri.v1))
+                        vertexList.Add(SMDTri.v1);
+                    if (!vertexList.Contains(SMDTri.v2))
+                        vertexList.Add(SMDTri.v2);
+                    if (!vertexList.Contains(SMDTri.v3))
+                        vertexList.Add(SMDTri.v3);
+                }
+
                 //Add all vertex data
                 GXVertexBuffer vPos = new GXVertexBuffer()
                 {
