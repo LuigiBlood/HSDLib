@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using OpenTK.Graphics.OpenGL;
 using HSDLib.Helpers.TriangleConverter;
 using System.Globalization;
+using System.Drawing;
 
 namespace HALSysDATViewer.Modeling
 {
@@ -95,7 +96,11 @@ namespace HALSysDATViewer.Modeling
                     {
                         RootList.Add(id);
                         //RootJOBJ = b;
-                        b.Flags |= JOBJ_FLAG.SKELETON_ROOT | JOBJ_FLAG.CLASSICAL_SCALING | JOBJ_FLAG.ROOT_OPA | JOBJ_FLAG.ROOT_XLU | JOBJ_FLAG.ROOT_TEXEDGE;
+                        b.Flags |= JOBJ_FLAG.SKELETON_ROOT | JOBJ_FLAG.CLASSICAL_SCALING | JOBJ_FLAG.ENVELOPE_MODEL | JOBJ_FLAG.TEXEDGE | JOBJ_FLAG.ROOT_TEXEDGE;
+                    }
+                    else
+                    {
+                        b.Flags |= JOBJ_FLAG.SKELETON | JOBJ_FLAG.CLASSICAL_SCALING | JOBJ_FLAG.TEXEDGE;
                     }
                     BoneList.Add(id, b);
                 }
@@ -212,6 +217,11 @@ namespace HALSysDATViewer.Modeling
                     vertexList.Add(SMDTri.v3);
                 }
 
+                string _matPath = Path.GetDirectoryName(fname) + Path.DirectorySeparatorChar + TriList[id][0].Material + ".bmp";
+                Console.WriteLine(_matPath);
+                Image _matBitmap = Image.FromFile(_matPath);
+                byte[] dummy = new byte[0];
+
                 HSD_JOBJ _joint = BoneList[id];
                 HSD_POBJ _poly = new HSD_POBJ();
                 HSD_DOBJ _display = new HSD_DOBJ();
@@ -239,19 +249,21 @@ namespace HALSysDATViewer.Modeling
                         WrapT = GXWrapMode.REPEAT,
                         WScale = 1,
                         HScale = 1,
-                        Flags = TOBJ_FLAGS.COORD_UV | TOBJ_FLAGS.LIGHTMAP_DIFFUSE | TOBJ_FLAGS.COLORMAP_ADD,
+                        Flags = TOBJ_FLAGS.COORD_UV | TOBJ_FLAGS.LIGHTMAP_DIFFUSE | TOBJ_FLAGS.COLORMAP_ALPHA_MASK,
                         Blending = 1,
                         MagFilter = GXTexFilter.GX_LINEAR,
                         ImageData = new HSD_Image()
                         {
-                            Width = 16,
-                            Height = 16,
-                            Format = GXTexFmt.RGB565,
-                            Mipmap = 1,
-                            MaxLOD = 1,
+                            Width = (ushort)_matBitmap.Width,
+                            Height = (ushort)_matBitmap.Height,
+                            Format = GXTexFmt.RGBA8,
+                            Mipmap = 0,
+                            MaxLOD = 0,
                             MinLOD = 0,
 
-                            Data = new byte[]
+                            Data = HSDLib.Helpers.TPL.ConvertToTextureMelee(_matBitmap, (int)TPL_TextureFormat.RGBA8, (int)TPL_PaletteFormat.None, out dummy),
+
+                            /*Data = new byte[]
                             {
                                 0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
                                 0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
@@ -300,14 +312,39 @@ namespace HALSysDATViewer.Modeling
 
                                 0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
                                 0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
-                            },
+                            },*/
                         },
+
+                        /*TEV = new HSD_TOBJ_TEV
+                        {
+                            color_op = 0,   //GX_TEV_ADD
+                            color_bias = 0, //GX_TB_ZERO
+                            color_clamp = 0,    //GX_TC_LINEAR
+
+                            color_a = 15,   //GX_CC_ZERO
+                            color_b = 15,   //GX_CC_ZERO
+                            color_c = 15,   //GX_CC_ZERO
+                            color_d = 8,    //GX_CC_TEXC
+
+                            alpha_op = 0,   //GX_TEV_ADD
+                            alpha_bias = 0, //GX_TB_ZERO
+
+                            alpha_a = 7,    //GX_CA_ZERO
+                            alpha_b = 7,    //GX_CA_ZERO
+                            alpha_c = 7,    //GX_CA_ZERO
+                            alpha_d = 6,    //GX_CA_KONST
+
+                            konst = 0xFFFFFFFF, //WHITE
+                            tev0 = 0,
+                            tev1 = 0,
+                            active = 0,
+                        },*/
                     },
 
                     MaterialColor = new HSD_MCOBJ()
                     {
                         Alpha = 1f,
-                        Shininess = 1f,
+                        Shininess = 50f,
 
                         SPC_A = 255,
                         SPC_R = 255,

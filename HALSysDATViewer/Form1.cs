@@ -255,7 +255,7 @@ namespace HALSysDATViewer
 
                         HSD_JOBJ _jobj = (HSD_JOBJ)((Node_Generic)nodeTree.SelectedNode).Node;
                         _jobj.NameOffset = s.RootJOBJ.NameOffset;
-                        _jobj.Flags |= s.RootJOBJ.Flags;
+                        _jobj.Flags = s.RootJOBJ.Flags;
                         _jobj.Child = s.RootJOBJ.Child;
                         _jobj.Next = s.RootJOBJ.Next;
                         _jobj.DOBJ = s.RootJOBJ.DOBJ;
