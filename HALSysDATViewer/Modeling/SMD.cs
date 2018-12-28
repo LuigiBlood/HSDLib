@@ -114,16 +114,18 @@ namespace HALSysDATViewer.Modeling
                         if (time == 0)
                         {
                             HSD_JOBJ b = BoneList[int.Parse(args[0])];
-                            b.Transforms = new HSD_Transforms();
-                            b.Transforms.TX = float.Parse(args[1], CultureInfo.InvariantCulture);
-                            b.Transforms.TY = float.Parse(args[2], CultureInfo.InvariantCulture);
-                            b.Transforms.TZ = float.Parse(args[3], CultureInfo.InvariantCulture);
-                            b.Transforms.RX = float.Parse(args[4], CultureInfo.InvariantCulture);
-                            b.Transforms.RY = float.Parse(args[5], CultureInfo.InvariantCulture);
-                            b.Transforms.RZ = float.Parse(args[6], CultureInfo.InvariantCulture);
-                            b.Transforms.SX = 1f;
-                            b.Transforms.SY = 1f;
-                            b.Transforms.SZ = 1f;
+                            b.Transforms = new HSD_Transforms()
+                            {
+                                TX = float.Parse(args[1], CultureInfo.InvariantCulture),
+                                TY = float.Parse(args[2], CultureInfo.InvariantCulture),
+                                TZ = float.Parse(args[3], CultureInfo.InvariantCulture),
+                                RX = float.Parse(args[4], CultureInfo.InvariantCulture),
+                                RY = float.Parse(args[5], CultureInfo.InvariantCulture),
+                                RZ = float.Parse(args[6], CultureInfo.InvariantCulture),
+                                SX = 1f,
+                                SY = 1f,
+                                SZ = 1f,
+                            };
                         }
                     }
                     //JOBJBoneList = RootJOBJ.DepthFirstList;
@@ -159,9 +161,14 @@ namespace HALSysDATViewer.Modeling
                         }
 
                         GXVertex vert = new GXVertex();
-                        vert.Pos = new GXVector3(float.Parse(args[1], CultureInfo.InvariantCulture), float.Parse(args[2], CultureInfo.InvariantCulture), float.Parse(args[3], CultureInfo.InvariantCulture));
-                        vert.Nrm = new GXVector3(float.Parse(args[4], CultureInfo.InvariantCulture), float.Parse(args[5], CultureInfo.InvariantCulture), float.Parse(args[6], CultureInfo.InvariantCulture));
-                        vert.TEX0 = new GXVector2(float.Parse(args[7], CultureInfo.InvariantCulture), float.Parse(args[8], CultureInfo.InvariantCulture));
+                        vert.Pos = new GXVector3(float.Parse(args[1], CultureInfo.InvariantCulture),
+                            float.Parse(args[2], CultureInfo.InvariantCulture),
+                            float.Parse(args[3], CultureInfo.InvariantCulture));
+                        vert.Nrm = new GXVector3(float.Parse(args[4], CultureInfo.InvariantCulture),
+                            float.Parse(args[5], CultureInfo.InvariantCulture),
+                            float.Parse(args[6], CultureInfo.InvariantCulture));
+                        vert.TEX0 = new GXVector2(float.Parse(args[7], CultureInfo.InvariantCulture),
+                            float.Parse(args[8], CultureInfo.InvariantCulture));
                         if (args.Length > 9)
                         {
                             // eww, gross, please fix later
@@ -202,29 +209,24 @@ namespace HALSysDATViewer.Modeling
             // 3 - Use the list to make the DisplayList
             // 4 - Done
 
-            //Process each joint seperately
+            //Process each material to avoid duplicates
+            Dictionary<string, HSD_MOBJ> Materials = new Dictionary<string, HSD_MOBJ>();
+            List<string> MatNameList = new List<string>();
             foreach (int id in TriList.Keys)
             {
-                TriangleConverter triConverter = new TriangleConverter(true, 52, 2, true);
-                int newTriPointCount = 0;
-                int newTriFaceCount = 0;
-
-                List<GXVertex> vertexList = new List<GXVertex>();
                 foreach (SMDTriangle SMDTri in TriList[id])
                 {
-                    vertexList.Add(SMDTri.v1);
-                    vertexList.Add(SMDTri.v2);
-                    vertexList.Add(SMDTri.v3);
+                    if (!MatNameList.Contains(SMDTri.Material))
+                        MatNameList.Add(SMDTri.Material);
                 }
+            }
 
-                string _matPath = Path.GetDirectoryName(fname) + Path.DirectorySeparatorChar + TriList[id][0].Material + ".bmp";
+            foreach (string MatName in MatNameList)
+            {
+                string _matPath = Path.GetDirectoryName(fname) + Path.DirectorySeparatorChar + MatName + ".png";
                 Console.WriteLine(_matPath);
                 Image _matBitmap = Image.FromFile(_matPath);
-                byte[] dummy = new byte[0];
 
-                HSD_JOBJ _joint = BoneList[id];
-                HSD_POBJ _poly = new HSD_POBJ();
-                HSD_DOBJ _display = new HSD_DOBJ();
                 HSD_MOBJ _mat = new HSD_MOBJ()
                 {
                     RenderFlags = RENDER_MODE.ALPHA_COMPAT | RENDER_MODE.DIFFSE_MAT | RENDER_MODE.TEX0 | RENDER_MODE.XLU,
@@ -250,18 +252,18 @@ namespace HALSysDATViewer.Modeling
                         WScale = 1,
                         HScale = 1,
                         Flags = TOBJ_FLAGS.COORD_UV | TOBJ_FLAGS.LIGHTMAP_DIFFUSE | TOBJ_FLAGS.COLORMAP_ALPHA_MASK,
+                        //TOBJ_FLAGS.COLORMAP_ALPHA_MASK for formats with alpha
+                        //TOBJ_FLAGS.COLORMAP_BLEND for formats without alpha
                         Blending = 1,
                         MagFilter = GXTexFilter.GX_LINEAR,
                         ImageData = new HSD_Image()
                         {
                             Width = (ushort)_matBitmap.Width,
                             Height = (ushort)_matBitmap.Height,
-                            Format = GXTexFmt.RGBA8,
+                            Format = GXTexFmt.RGB565,
                             Mipmap = 0,
                             MaxLOD = 0,
                             MinLOD = 0,
-
-                            Data = HSDLib.Helpers.TPL.ConvertToTextureMelee(_matBitmap, (int)TPL_TextureFormat.RGBA8, (int)TPL_PaletteFormat.None, out dummy),
 
                             /*Data = new byte[]
                             {
@@ -315,6 +317,12 @@ namespace HALSysDATViewer.Modeling
                             },*/
                         },
 
+                        /*Tlut = new HSD_Tlut()
+                        {
+                            GXTlut = 0,
+                            Format = GXTlutFmt.RGB5A3,
+                        },*/
+
                         /*TEV = new HSD_TOBJ_TEV
                         {
                             color_op = 0,   //GX_TEV_ADD
@@ -362,6 +370,34 @@ namespace HALSysDATViewer.Modeling
                         AMB_B = 255,
                     },
                 };
+
+                byte[] dummy;
+                //_mat.Textures.ImageData.Data = TPL.ConvertToTextureMelee(_matBitmap, (int)TPL_TextureFormat.RGBA8, (int)TPL_PaletteFormat.None, out _mat.Textures.Tlut.Data);
+                _mat.Textures.ImageData.Data = TPL.ConvertToTextureMelee(_matBitmap, (int)TPL_TextureFormat.RGB565, (int)TPL_PaletteFormat.None, out dummy);
+                //_mat.Textures.Tlut.ColorCount = (ushort)(_mat.Textures.Tlut.Data.Length / 2);
+
+                Materials.Add(MatName, _mat);
+            }
+
+            //Process each joint seperately
+            foreach (int id in TriList.Keys)
+            {
+                TriangleConverter triConverter = new TriangleConverter(true, 52, 2, true);
+                int newTriPointCount = 0;
+                int newTriFaceCount = 0;
+
+                List<GXVertex> vertexList = new List<GXVertex>();
+                foreach (SMDTriangle SMDTri in TriList[id])
+                {
+                    vertexList.Add(SMDTri.v1);
+                    vertexList.Add(SMDTri.v2);
+                    vertexList.Add(SMDTri.v3);
+                }
+
+                HSD_JOBJ _joint = BoneList[id];
+                HSD_POBJ _poly = new HSD_POBJ();
+                HSD_DOBJ _display = new HSD_DOBJ();
+                HSD_MOBJ _mat = Materials[TriList[id][0].Material];
 
                 List<PrimitiveGroup> _primitivesConv = triConverter.GroupPrimitives(vertexList.ToArray(), out newTriPointCount, out newTriFaceCount);
                 List<GXPrimitiveGroup> _prim = new List<GXPrimitiveGroup>();
