@@ -269,5 +269,18 @@ namespace HALSysDATViewer
                 }
             }
         }
+
+        private void importDAEToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                ofd.Filter = "Collada (*.dae)|*.dae";
+
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    DAE test = new DAE(ofd.FileName);
+                }
+            }
+        }
     }
 }

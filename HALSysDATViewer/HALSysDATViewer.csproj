@@ -57,6 +57,9 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Modeling\DAE.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Modeling\SMD.cs" />
     <Compile Include="NodeManager.cs" />
     <Compile Include="Nodes\FolderNode.cs" />
