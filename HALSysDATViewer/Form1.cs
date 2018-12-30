@@ -279,6 +279,33 @@ namespace HALSysDATViewer
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     DAE test = new DAE(ofd.FileName);
+                    Renderer.RootNode = test.RootJOBJ;
+                }
+            }
+        }
+
+        private void importDAEToSelectedRootJOBJToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                ofd.Filter = "Collada (*.dae)|*.dae";
+
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    DAE s = new DAE(ofd.FileName);
+
+                    HSD_JOBJ _jobj = (HSD_JOBJ)((Node_Generic)nodeTree.SelectedNode).Node;
+                    _jobj.NameOffset = s.RootJOBJ.NameOffset;
+                    _jobj.Flags = s.RootJOBJ.Flags;
+                    _jobj.Child = s.RootJOBJ.Child;
+                    _jobj.Next = s.RootJOBJ.Next;
+                    _jobj.DOBJ = s.RootJOBJ.DOBJ;
+                    _jobj.Transforms = s.RootJOBJ.Transforms;
+                    _jobj.InverseMatrix = s.RootJOBJ.InverseMatrix;
+                    _jobj.ROBJOffset = s.RootJOBJ.ROBJOffset;
+
+
+                    RefreshNodes();
                 }
             }
         }

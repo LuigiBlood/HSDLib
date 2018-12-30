@@ -17,13 +17,370 @@ namespace HALSysDATViewer.Modeling
 {
     public partial class DAE : Form
     {
-        HSD_JOBJ RootJOBJ;
+        public HSD_JOBJ RootJOBJ;
 
         public DAE(string path)
         {
             using (DecoderShell shell = DecoderShell.Import(path))
             {
-                var test = 0;
+                //Get all images
+                Dictionary<string, HSD_Image> images = new Dictionary<string, HSD_Image>();
+
+                foreach (ImageEntry img in shell._images)
+                {
+                    string name = img._path != null ?
+                        Path.GetFileNameWithoutExtension(img._path) :
+                        img._name != null ? img._name : img._id;
+
+                    Image _matBitmap = Image.FromFile(Path.GetDirectoryName(path) + Path.DirectorySeparatorChar + img._path);
+                    byte[] dummy;
+
+                    HSD_Image image = new HSD_Image()
+                    {
+                        Format = GXTexFmt.RGB565,
+                        MinLOD = 0,
+                        MaxLOD = 0,
+                        Mipmap = 0,
+                        Height = (ushort)_matBitmap.Height,
+                        Width = (ushort)_matBitmap.Width,
+
+                        Data = TPL.ConvertToTextureMelee(_matBitmap, (int)TPL_TextureFormat.RGB565, (int)TPL_PaletteFormat.None, out dummy),
+                    };
+
+                    images.Add(img._id, image);
+                }
+
+                //Get all materials
+                Dictionary<string, HSD_MOBJ> materials = new Dictionary<string, HSD_MOBJ>();
+
+                foreach (MaterialEntry material in shell._materials)
+                {
+                    foreach (EffectEntry effect in shell._effects)
+                    {
+                        if (effect._id == material._effect.Substring(1, material._effect.Length - 2))
+                        {
+                            HSD_MOBJ _mat = new HSD_MOBJ()
+                            {
+                                NameOffset = 0,
+                                RenderFlags = RENDER_MODE.XLU | RENDER_MODE.ALPHA_COMPAT | RENDER_MODE.DIFFSE_MAT | RENDER_MODE.DIFFUSE,
+                                MaterialColor = new HSD_MCOBJ()
+                                {
+                                    AMB_R = 255,
+                                    AMB_G = 255,
+                                    AMB_B = 255,
+                                    AMB_A = 255,
+                                    DIF_R = 255,
+                                    DIF_G = 255,
+                                    DIF_B = 255,
+                                    DIF_A = 255,
+                                    SPC_R = 255,
+                                    SPC_G = 255,
+                                    SPC_B = 255,
+                                    SPC_A = 255,
+                                    Alpha = 1f,
+                                    Shininess = 50f,
+                                },
+                            };
+                            
+                            foreach (LightEffectEntry light in effect._shader._effects)
+                            {
+                                if (light._color != null)
+                                {
+                                    switch (light._type)
+                                    {
+                                        case (LightEffectType.ambient):
+                                            _mat.MaterialColor.AMB_R = light._color.R;
+                                            _mat.MaterialColor.AMB_G = light._color.G;
+                                            _mat.MaterialColor.AMB_B = light._color.B;
+                                            _mat.MaterialColor.AMB_A = light._color.A;
+                                            break;
+                                        case (LightEffectType.diffuse):
+                                            _mat.MaterialColor.DIF_R = light._color.R;
+                                            _mat.MaterialColor.DIF_G = light._color.G;
+                                            _mat.MaterialColor.DIF_B = light._color.B;
+                                            _mat.MaterialColor.DIF_A = light._color.A;
+                                            break;
+                                        case (LightEffectType.specular):
+                                            _mat.MaterialColor.SPC_R = light._color.R;
+                                            _mat.MaterialColor.SPC_G = light._color.G;
+                                            _mat.MaterialColor.SPC_B = light._color.B;
+                                            _mat.MaterialColor.SPC_A = light._color.A;
+                                            break;
+                                    }
+                                }
+
+                                if (light._texture != null)
+                                {
+                                    //Find Sampler2D
+                                    EffectNewParam base_sampler2d = new EffectNewParam();
+                                    foreach (EffectNewParam newparam in effect._newParams)
+                                    {
+                                        if (newparam._sid == light._texture)
+                                        {
+                                            base_sampler2d = newparam;
+                                        }
+                                    }
+
+                                    //Find Surface
+                                    foreach (EffectNewParam newparam in effect._newParams)
+                                    {
+                                        if (newparam._sid == base_sampler2d._sampler2D._source)
+                                        {
+                                            _mat.Textures = new HSD_TOBJ()
+                                            {
+                                                Flags = TOBJ_FLAGS.COORD_UV | TOBJ_FLAGS.LIGHTMAP_AMBIENT | TOBJ_FLAGS.COLORMAP_BLEND,
+                                                Blending = 1f,
+                                                GXTexGenSrc = 4,
+                                                MagFilter = GXTexFilter.GX_LINEAR,
+                                                TexMapID = GXTexMapID.GX_TEXMAP0,
+                                                NameOffset = 0,
+                                                Transform = new HSD_Transforms()
+                                                {
+                                                    TX = 0,
+                                                    TY = 0,
+                                                    TZ = 0,
+                                                    SX = 1,
+                                                    SY = 1,
+                                                    SZ = 1,
+                                                    RX = 0,
+                                                    RY = 0,
+                                                    RZ = 0,
+                                                },
+                                                WrapS = GXWrapMode.CLAMP,
+                                                WrapT = GXWrapMode.CLAMP,
+                                                WScale = 1,
+                                                HScale = 1,
+                                                ImageData = images[newparam._path],
+                                            };
+                                        }
+                                    }
+                                }
+                            }
+                            _mat.MaterialColor.Shininess = effect._shader._shininess;
+                            _mat.MaterialColor.Alpha = effect._shader._transparency;
+                            materials.Add(material._id, _mat);
+                        }
+                    }
+                }
+
+                //Get all models
+                Dictionary<string, HSD_POBJ> polygons = new Dictionary<string, HSD_POBJ>();
+
+                foreach (GeometryEntry geometry in shell._geometry)
+                {
+                    List<GXVertexBuffer> buffers = new List<GXVertexBuffer>();
+                    GXDisplayList dlist = new GXDisplayList()
+                    {
+                        Primitives = new List<GXPrimitiveGroup>(),
+                    };
+                    HSD_POBJ _poly = new HSD_POBJ()
+                    {
+                        Flags = POBJ_FLAG.SKIN,
+                        VertexAttributes = new HSD_AttributeGroup(),
+                    };
+
+                    foreach (PrimitiveEntry _prim in geometry._primitives)
+                    {
+                        foreach (InputEntry _input in _prim._inputs)
+                        {
+                            GXVertexBuffer buffer = new GXVertexBuffer()
+                            {
+                                AttributeType = GXAttribType.GX_INDEX16,
+                                Scale = 0,
+                            };
+
+                            switch (_input._semantic)
+                            {
+                                case SemanticType.VERTEX:
+                                    //hacky, should check vertices instead to make sure
+                                    buffer.Name = GXAttribName.GX_VA_POS;
+                                    break;
+                                case SemanticType.NORMAL:
+                                    buffer.Name = GXAttribName.GX_VA_NRM;
+                                    break;
+                                case SemanticType.TEXCOORD:
+                                    buffer.Name = GXAttribName.GX_VA_TEX0 + _input._set;
+                                    break;
+                            }
+
+                            //Get Source
+                            foreach (SourceEntry source in geometry._sources)
+                            {
+                                string compare = "";
+                                if (_input._semantic == SemanticType.VERTEX)
+                                {
+                                    compare = geometry._verticesInput._source.Substring(1, geometry._verticesInput._source.Length - 2);
+                                }
+                                else
+                                {
+                                    compare = _input._source.Substring(1, _input._source.Length - 2);
+                                }
+
+                                if (source._id == compare)
+                                {
+                                    //Data Type and Stride
+                                    switch (source._arrayType)
+                                    {
+                                        case (SourceType.Float):
+                                            buffer.CompType = GXCompType.Float;
+                                            buffer.Stride = (ushort)(source._accessorStride * 4);
+                                            break;
+                                        case (SourceType.Int):
+                                            buffer.CompType = GXCompType.Int16;
+                                            buffer.Stride = (ushort)(source._accessorStride * 2);
+                                            break;
+                                    }
+
+                                    //CompCount
+                                    switch (_input._semantic)
+                                    {
+                                        case SemanticType.VERTEX:
+                                            if (source._accessorStride == 2)
+                                                buffer.CompCount = GXCompCnt.PosXY;
+                                            else if (source._accessorStride == 3)
+                                                buffer.CompCount = GXCompCnt.PosXYZ;
+                                            break;
+                                        case SemanticType.NORMAL:
+                                            if (source._accessorStride == 3)
+                                                buffer.CompCount = GXCompCnt.NrmXYZ;
+                                            break;
+                                        case SemanticType.TEXCOORD:
+                                            if (source._accessorStride == 1)
+                                                buffer.CompCount = GXCompCnt.TexS;
+                                            else if (source._accessorStride == 2)
+                                                buffer.CompCount = GXCompCnt.TexST;
+                                            break;
+                                    }
+
+                                    //Data
+                                    List<byte> byteArray = new List<byte>();
+                                    switch (source._arrayType)
+                                    {
+                                        case (SourceType.Float):
+                                            foreach (float f in (float[])source._arrayData)
+                                            {
+                                                byteArray.Add(BitConverter.GetBytes(f)[3]);
+                                                byteArray.Add(BitConverter.GetBytes(f)[2]);
+                                                byteArray.Add(BitConverter.GetBytes(f)[1]);
+                                                byteArray.Add(BitConverter.GetBytes(f)[0]);
+                                            }
+                                            break;
+                                        case (SourceType.Int):
+                                            //Not supported for now
+                                            break;
+                                    }
+                                    buffer.DataBuffer = byteArray.ToArray();
+                                }
+                            }
+
+                            //Insert
+                            buffers.Insert(_input._offset, buffer);
+                        }
+                        //Put all inputs into VertexAttributes
+                        _poly.VertexAttributes.Attributes = buffers;
+
+                        //Manage Primitives
+                        GXPrimitiveGroup p = new GXPrimitiveGroup();
+
+                        //Primitive Type
+                        switch (_prim._type)
+                        {
+                            case (ColladaPrimitiveType.triangles):
+                                p.PrimitiveType = GXPrimitiveType.Triangles;
+                                break;
+                        }
+
+                        p.Count = (ushort)_prim._pointCount;
+                        p.Indices = new GXIndexGroup[_prim._pointCount];
+                        for (int i = 0; i < p.Indices.Length; i++)
+                            p.Indices[i] = new GXIndexGroup()
+                            {
+                                Indices = new ushort[_prim._entryStride],
+                            };
+
+                        //Add each index for each point
+                        foreach (PrimitiveFace face in _prim._faces)
+                        {
+                            for (int j = 0; j < face._pointIndices.Length; j++)
+                            {
+                                p.Indices[j / _prim._entryStride].Indices[j % (_prim._entryStride)] = face._pointIndices[j];
+                            }
+                        }
+                        dlist.Primitives.Add(p);
+                    }
+                    //Convert to Display List Buffer
+                    _poly.DisplayListBuffer = dlist.ToBuffer(_poly.VertexAttributes);
+
+                    //Add POBJ to the list
+                    polygons.Add(geometry._id, _poly);
+                }
+
+                RootJOBJ = new HSD_JOBJ()
+                {
+                    Flags = JOBJ_FLAG.SKELETON_ROOT | JOBJ_FLAG.CLASSICAL_SCALING | JOBJ_FLAG.ROOT_TEXEDGE | JOBJ_FLAG.ROOT_OPA | JOBJ_FLAG.TEXEDGE,
+                    Transforms = new HSD_Transforms()
+                    {
+                        TX = 0,
+                        TY = 0,
+                        TZ = 0,
+                        RX = 0,
+                        RY = 0,
+                        RZ = 0,
+                        SX = 1,
+                        SY = 1,
+                        SZ = 1,
+                    },
+                };
+
+                foreach (SceneEntry scene in shell._scenes)
+                {
+                    foreach (NodeEntry node in scene._nodes)
+                    {
+                        //Get first instance of a mesh
+                        InstanceEntry mesh = new InstanceEntry();
+                        bool meshFound = false;
+                        foreach (InstanceEntry instance in node._instances)
+                        {
+                            if (instance._type == InstanceType.Geometry)
+                            {
+                                mesh = instance;
+                                meshFound = true;
+                                break;
+                            }
+                        }
+
+                        if (meshFound)
+                        {
+                            HSD_JOBJ joint = new HSD_JOBJ();
+                            //Get Matrix
+                            Vector3 translate = node._matrix.ExtractTranslation();
+                            Quaternion rotate = node._matrix.ExtractRotation();
+                            Vector3 scale = node._matrix.ExtractScale();
+                            joint.Transforms = new HSD_Transforms()
+                            {
+                                TX = translate.X,
+                                TY = translate.Y,
+                                TZ = translate.Z,
+                                SX = scale.X,
+                                SY = scale.Y,
+                                SZ = scale.Z,
+                                RX = rotate.X * rotate.W,
+                                RY = rotate.Y * rotate.W,
+                                RZ = rotate.Z * rotate.W,
+                            };
+
+                            joint.ROBJOffset = 0;
+                            joint.NameOffset = 0;
+                            joint.DOBJ = new HSD_DOBJ()
+                            {
+                                MOBJ = materials[mesh._material._target.Substring(1, mesh._material._target.Length - 2)],
+                                POBJ = polygons[mesh._url.Substring(1, mesh._url.Length - 2)],
+                            };                            
+
+                            RootJOBJ.AddChild(joint);
+                        }
+                    }
+                }
             }
         }
 

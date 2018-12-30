@@ -40,6 +40,7 @@
             this.openDATToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportDATToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.importDAEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importSMDToSelectedRootJOBJToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,7 +48,7 @@
             this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.importSMDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.importDAEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importDAEToSelectedRootJOBJToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -156,7 +157,7 @@
             // 
             this.openDATToolStripMenuItem.Name = "openDATToolStripMenuItem";
             this.openDATToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openDATToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openDATToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.openDATToolStripMenuItem.Text = "Open DAT";
             this.openDATToolStripMenuItem.Click += new System.EventHandler(this.openDATToolStripMenuItem_Click);
             // 
@@ -164,22 +165,30 @@
             // 
             this.exportDATToolStripMenuItem.Name = "exportDATToolStripMenuItem";
             this.exportDATToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.exportDATToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportDATToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.exportDATToolStripMenuItem.Text = "Export DAT";
             this.exportDATToolStripMenuItem.Click += new System.EventHandler(this.exportDATToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(172, 22);
             this.toolStripMenuItem1.Text = "Import SMD...";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.importSMDToolStripMenuItem_Click);
+            // 
+            // importDAEToolStripMenuItem
+            // 
+            this.importDAEToolStripMenuItem.Name = "importDAEToolStripMenuItem";
+            this.importDAEToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.importDAEToolStripMenuItem.Text = "Import DAE...";
+            this.importDAEToolStripMenuItem.Click += new System.EventHandler(this.importDAEToolStripMenuItem_Click);
             // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.deleteNodeToolStripMenuItem,
-            this.importSMDToSelectedRootJOBJToolStripMenuItem});
+            this.importSMDToSelectedRootJOBJToolStripMenuItem,
+            this.importDAEToSelectedRootJOBJToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.editToolStripMenuItem.Text = "Edit";
@@ -234,12 +243,12 @@
             this.importSMDToolStripMenuItem.Text = "Import SMD...";
             this.importSMDToolStripMenuItem.Click += new System.EventHandler(this.importSMDToolStripMenuItem_Click);
             // 
-            // importDAEToolStripMenuItem
+            // importDAEToSelectedRootJOBJToolStripMenuItem
             // 
-            this.importDAEToolStripMenuItem.Name = "importDAEToolStripMenuItem";
-            this.importDAEToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.importDAEToolStripMenuItem.Text = "Import DAE...";
-            this.importDAEToolStripMenuItem.Click += new System.EventHandler(this.importDAEToolStripMenuItem_Click);
+            this.importDAEToSelectedRootJOBJToolStripMenuItem.Name = "importDAEToSelectedRootJOBJToolStripMenuItem";
+            this.importDAEToSelectedRootJOBJToolStripMenuItem.Size = new System.Drawing.Size(253, 22);
+            this.importDAEToSelectedRootJOBJToolStripMenuItem.Text = "Import DAE to selected Root JOBJ";
+            this.importDAEToSelectedRootJOBJToolStripMenuItem.Click += new System.EventHandler(this.importDAEToSelectedRootJOBJToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -291,6 +300,7 @@
         private System.Windows.Forms.ToolStripMenuItem deleteNodeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importSMDToSelectedRootJOBJToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importDAEToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importDAEToSelectedRootJOBJToolStripMenuItem;
     }
 }
 
