@@ -57,7 +57,7 @@ namespace HALSysDATViewer.Modeling
                 {
                     foreach (EffectEntry effect in shell._effects)
                     {
-                        if (effect._id == material._effect.Substring(1, material._effect.Length - 2))
+                        if (effect._id == material._effect)
                         {
                             HSD_MOBJ _mat = new HSD_MOBJ()
                             {
@@ -209,11 +209,11 @@ namespace HALSysDATViewer.Modeling
                                 string compare = "";
                                 if (_input._semantic == SemanticType.VERTEX)
                                 {
-                                    compare = geometry._verticesInput._source.Substring(1, geometry._verticesInput._source.Length - 2);
+                                    compare = geometry._verticesInput._source;
                                 }
                                 else
                                 {
-                                    compare = _input._source.Substring(1, _input._source.Length - 2);
+                                    compare = _input._source;
                                 }
 
                                 if (source._id == compare)
@@ -280,33 +280,46 @@ namespace HALSysDATViewer.Modeling
                         _poly.VertexAttributes.Attributes = buffers;
 
                         //Manage Primitives
-                        GXPrimitiveGroup p = new GXPrimitiveGroup();
-
-                        //Primitive Type
-                        switch (_prim._type)
+                        if (_prim._type == ColladaPrimitiveType.triangles
+                            || _prim._type == ColladaPrimitiveType.tristrips
+                            || _prim._type == ColladaPrimitiveType.trifans
+                            || _prim._type == ColladaPrimitiveType.polylist)
                         {
-                            case (ColladaPrimitiveType.triangles):
-                                p.PrimitiveType = GXPrimitiveType.Triangles;
-                                break;
-                        }
+                            GXPrimitiveGroup p = new GXPrimitiveGroup();
 
-                        p.Count = (ushort)_prim._pointCount;
-                        p.Indices = new GXIndexGroup[_prim._pointCount];
-                        for (int i = 0; i < p.Indices.Length; i++)
-                            p.Indices[i] = new GXIndexGroup()
+                            //Primitive Type
+                            switch (_prim._type)
                             {
-                                Indices = new ushort[_prim._entryStride],
-                            };
-
-                        //Add each index for each point
-                        foreach (PrimitiveFace face in _prim._faces)
-                        {
-                            for (int j = 0; j < face._pointIndices.Length; j++)
-                            {
-                                p.Indices[j / _prim._entryStride].Indices[j % (_prim._entryStride)] = face._pointIndices[j];
+                                case (ColladaPrimitiveType.tristrips):
+                                    p.PrimitiveType = GXPrimitiveType.TriangleStrip;
+                                    break;
+                                case (ColladaPrimitiveType.trifans):
+                                    p.PrimitiveType = GXPrimitiveType.TriangleFan;
+                                    break;
+                                case (ColladaPrimitiveType.triangles):
+                                default:
+                                    p.PrimitiveType = GXPrimitiveType.Triangles;
+                                    break;
                             }
+
+                            p.Count = (ushort)_prim._pointCount;
+                            p.Indices = new GXIndexGroup[_prim._pointCount];
+                            for (int i = 0; i < p.Indices.Length; i++)
+                                p.Indices[i] = new GXIndexGroup()
+                                {
+                                    Indices = new ushort[_prim._entryStride],
+                                };
+
+                            //Add each index for each point
+                            foreach (PrimitiveFace face in _prim._faces)
+                            {
+                                for (int j = 0; j < face._pointIndices.Length; j++)
+                                {
+                                    p.Indices[j / _prim._entryStride].Indices[j % (_prim._entryStride)] = face._pointIndices[j];
+                                }
+                            }
+                            dlist.Primitives.Add(p);
                         }
-                        dlist.Primitives.Add(p);
                     }
                     //Convert to Display List Buffer
                     _poly.DisplayListBuffer = dlist.ToBuffer(_poly.VertexAttributes);
@@ -336,52 +349,61 @@ namespace HALSysDATViewer.Modeling
                 {
                     foreach (NodeEntry node in scene._nodes)
                     {
-                        //Get first instance of a mesh
-                        InstanceEntry mesh = new InstanceEntry();
-                        bool meshFound = false;
-                        foreach (InstanceEntry instance in node._instances)
-                        {
-                            if (instance._type == InstanceType.Geometry)
-                            {
-                                mesh = instance;
-                                meshFound = true;
-                                break;
-                            }
-                        }
-
-                        if (meshFound)
-                        {
-                            HSD_JOBJ joint = new HSD_JOBJ();
-                            //Get Matrix
-                            Vector3 translate = node._matrix.ExtractTranslation();
-                            Quaternion rotate = node._matrix.ExtractRotation();
-                            Vector3 scale = node._matrix.ExtractScale();
-                            joint.Transforms = new HSD_Transforms()
-                            {
-                                TX = translate.X,
-                                TY = translate.Y,
-                                TZ = translate.Z,
-                                SX = scale.X,
-                                SY = scale.Y,
-                                SZ = scale.Z,
-                                RX = rotate.X * rotate.W,
-                                RY = rotate.Y * rotate.W,
-                                RZ = rotate.Z * rotate.W,
-                            };
-
-                            joint.ROBJOffset = 0;
-                            joint.NameOffset = 0;
-                            joint.DOBJ = new HSD_DOBJ()
-                            {
-                                MOBJ = materials[mesh._material._target.Substring(1, mesh._material._target.Length - 2)],
-                                POBJ = polygons[mesh._url.Substring(1, mesh._url.Length - 2)],
-                            };                            
-
-                            RootJOBJ.AddChild(joint);
-                        }
+                        CheckNode(RootJOBJ, node, materials, polygons);
                     }
                 }
             }
+        }
+
+        private void CheckNode(HSD_JOBJ joint, NodeEntry node, Dictionary<string, HSD_MOBJ> materials, Dictionary<string, HSD_POBJ> polygons)
+        {
+            HSD_JOBJ jointChild = new HSD_JOBJ();
+            foreach (NodeEntry nodeChild in node._children)
+            {
+                CheckNode(jointChild, nodeChild, materials, polygons);
+            }
+
+            //Get first instance of a mesh
+            InstanceEntry mesh = new InstanceEntry();
+            bool meshFound = false;
+            foreach (InstanceEntry instance in node._instances)
+            {
+                if (instance._type == InstanceType.Geometry)
+                {
+                    mesh = instance;
+                    meshFound = true;
+                    break;
+                }
+            }
+
+            //Get Matrix
+            Vector3 translate = node._matrix.ExtractTranslation();
+            Quaternion rotate = node._matrix.ExtractRotation();
+            Vector3 scale = node._matrix.ExtractScale();
+            jointChild.Transforms = new HSD_Transforms()
+            {
+                TX = translate.X,
+                TY = translate.Y,
+                TZ = translate.Z,
+                SX = scale.X,
+                SY = scale.Y,
+                SZ = scale.Z,
+                RX = rotate.X * rotate.W,
+                RY = rotate.Y * rotate.W,
+                RZ = rotate.Z * rotate.W,
+            };
+
+            jointChild.ROBJOffset = 0;
+            jointChild.NameOffset = 0;
+            if (meshFound)
+            {
+                jointChild.DOBJ = new HSD_DOBJ()
+                {
+                    MOBJ = materials[mesh._material._target],
+                    POBJ = polygons[mesh._url],
+                };
+            }
+            joint.AddChild(jointChild);
         }
 
         private class DecoderShell : IDisposable
@@ -536,7 +558,7 @@ namespace HALSysDATViewer.Modeling
                         {
                             if (childChildElement.Name.Equals("instance_effect"))
                                 if (childChildElement.HasAttribute("url"))
-                                    mat._effect = childChildElement.Attributes["url"].Value[0] == '#' ? (string)(childChildElement.Attributes["url"].Value + 1) : (string)childChildElement.Attributes["url"].Value;
+                                    mat._effect = childChildElement.Attributes["url"].Value[0] == '#' ? (string)(childChildElement.Attributes["url"].Value.Substring(1)) : (string)childChildElement.Attributes["url"].Value;
                         }
 
                         _materials.Add(mat);
@@ -633,7 +655,7 @@ namespace HALSysDATViewer.Modeling
                     else if (childElement.Name.Equals("instance_image"))
                     {
                         if (childElement.HasAttribute("url"))
-                            s._url = childElement.Attributes["url"].Value[0] == '#' ? (string)(childElement.Attributes["url"].Value + 1) : (string)childElement.Attributes["url"].Value;
+                            s._url = childElement.Attributes["url"].Value[0] == '#' ? (string)(childElement.Attributes["url"].Value.Substring(1)) : (string)childElement.Attributes["url"].Value;
                     }
                     else if (childElement.Name.Equals("wrap_s"))
                         s._wrapS = childElement.InnerText;
@@ -866,7 +888,7 @@ namespace HALSysDATViewer.Modeling
                 if (element.HasAttribute("offset"))
                     inp._offset = int.Parse((string)element.Attributes["offset"].Value);
                 if (element.HasAttribute("source"))
-                    inp._source = element.Attributes["source"].Value[0] == '#' ? (string)(element.Attributes["source"].Value + 1) : (string)element.Attributes["source"].Value;
+                    inp._source = element.Attributes["source"].Value[0] == '#' ? (string)(element.Attributes["source"].Value.Substring(1)) : (string)element.Attributes["source"].Value;
 
                 return inp;
             }
@@ -933,7 +955,7 @@ namespace HALSysDATViewer.Modeling
                             if (childChildElement.Name.Equals("accessor"))
                             {
                                 if (childChildElement.HasAttribute("source"))
-                                    src._accessorSource = childChildElement.Attributes["source"].Value[0] == '#' ? (string)(childChildElement.Attributes["source"].Value + 1) : (string)childChildElement.Attributes["source"].Value;
+                                    src._accessorSource = childChildElement.Attributes["source"].Value[0] == '#' ? (string)(childChildElement.Attributes["source"].Value.Substring(1)) : (string)childChildElement.Attributes["source"].Value;
                                 if (childChildElement.HasAttribute("count"))
                                     src._accessorCount = int.Parse((string)childChildElement.Attributes["count"].Value);
                                 if (childChildElement.HasAttribute("stride"))
@@ -973,7 +995,7 @@ namespace HALSysDATViewer.Modeling
                 skin._id = id;
 
                 if (element.HasAttribute("source"))
-                    skin._skinSource = element.Attributes["source"].Value[0] == '#' ? (string)(element.Attributes["source"].Value + 1) : (string)element.Attributes["source"].Value;
+                    skin._skinSource = element.Attributes["source"].Value[0] == '#' ? (string)(element.Attributes["source"].Value.Substring(1)) : (string)element.Attributes["source"].Value;
 
                 foreach (XmlElement childElement in element.ChildNodes)
                 {
@@ -1000,9 +1022,10 @@ namespace HALSysDATViewer.Modeling
                                 skin._weightInputs.Add(ParseInput(childChildElement));
                             else if (childChildElement.Name.Equals("vcount"))
                             {
+                                string[] vcount_array = childChildElement.InnerText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                                 for (int i = 0; i < skin._weightCount; i++)
                                 {
-                                    int val = int.Parse(childChildElement.InnerText);
+                                    int val = int.Parse(vcount_array[i]);
                                     skin._weights[i] = new int[val * skin._weightInputs.Count];
                                 }
                             }
@@ -1139,12 +1162,12 @@ namespace HALSysDATViewer.Modeling
                 c._type = type;
 
                 if (element.HasAttribute("url"))
-                    c._url = element.Attributes["url"].Value[0] == '#' ? (string)(element.Attributes["url"].Value + 1) : (string)element.Attributes["url"].Value;
+                    c._url = element.Attributes["url"].Value[0] == '#' ? (string)(element.Attributes["url"].Value.Substring(1)) : (string)element.Attributes["url"].Value;
 
                 foreach (XmlElement childElement in element.ChildNodes)
                 {
                     if (childElement.Name.Equals("skeleton"))
-                        c.skeletons.Add(childElement.Value[0] == '#' ? (string)(childElement.Value + 1) : (string)childElement.Value);
+                        c.skeletons.Add(childElement.InnerText[0] == '#' ? (string)(childElement.InnerText.Substring(1)) : (string)childElement.InnerText);
 
                     if (childElement.Name.Equals("bind_material"))
                         foreach (XmlElement childChildElement in childElement.ChildNodes)
@@ -1168,7 +1191,7 @@ namespace HALSysDATViewer.Modeling
                 if (element.HasAttribute("symbol"))
                     mat._symbol = (string)element.Attributes["symbol"].Value;
                 if (element.HasAttribute("target"))
-                    mat._target = element.Attributes["target"].Value[0] == '#' ? (string)(element.Attributes["target"].Value + 1) : (string)element.Attributes["target"].Value;
+                    mat._target = element.Attributes["target"].Value[0] == '#' ? (string)(element.Attributes["target"].Value.Substring(1)) : (string)element.Attributes["target"].Value;
 
                 foreach (XmlElement childElement in element.ChildNodes)
                 {
