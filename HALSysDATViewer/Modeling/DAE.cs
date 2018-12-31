@@ -349,18 +349,18 @@ namespace HALSysDATViewer.Modeling
                 {
                     foreach (NodeEntry node in scene._nodes)
                     {
-                        CheckNode(RootJOBJ, node, materials, polygons);
+                        ProcessNode(RootJOBJ, node, materials, polygons);
                     }
                 }
             }
         }
 
-        private void CheckNode(HSD_JOBJ joint, NodeEntry node, Dictionary<string, HSD_MOBJ> materials, Dictionary<string, HSD_POBJ> polygons)
+        private void ProcessNode(HSD_JOBJ joint, NodeEntry node, Dictionary<string, HSD_MOBJ> materials, Dictionary<string, HSD_POBJ> polygons)
         {
             HSD_JOBJ jointChild = new HSD_JOBJ();
             foreach (NodeEntry nodeChild in node._children)
             {
-                CheckNode(jointChild, nodeChild, materials, polygons);
+                ProcessNode(jointChild, nodeChild, materials, polygons);
             }
 
             //Get first instance of a mesh
