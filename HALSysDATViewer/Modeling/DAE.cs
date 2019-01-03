@@ -26,6 +26,95 @@ namespace HALSysDATViewer.Modeling
                 //Get all images
                 Dictionary<string, HSD_Image> images = new Dictionary<string, HSD_Image>();
 
+                //Dummy Image
+                HSD_Image image_dummy = new HSD_Image()
+                {
+                    Width = 16,
+                    Height = 16,
+                    Format = GXTexFmt.RGB565,
+                    Mipmap = 0,
+                    MaxLOD = 0,
+                    MinLOD = 0,
+
+                    Data = new byte[]
+                                                 {
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                     0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,  0xFF, 0xFF,
+                                                 },
+                };
+
+                HSD_TOBJ dummy_TOBJ = new HSD_TOBJ()
+                {
+                    Flags = TOBJ_FLAGS.COORD_UV | TOBJ_FLAGS.LIGHTMAP_DIFFUSE | TOBJ_FLAGS.COLORMAP_ALPHA_MASK,
+                    Blending = 1f,
+                    GXTexGenSrc = 4,
+                    MagFilter = GXTexFilter.GX_LINEAR,
+                    TexMapID = GXTexMapID.GX_TEXMAP0,
+                    NameOffset = 0,
+                    Transform = new HSD_Transforms()
+                    {
+                        TX = 0,
+                        TY = 0,
+                        TZ = 0,
+                        SX = 1,
+                        SY = 1,
+                        SZ = 1,
+                        RX = 0,
+                        RY = 0,
+                        RZ = 0,
+                    },
+                    WrapS = GXWrapMode.REPEAT,
+                    WrapT = GXWrapMode.REPEAT,
+                    WScale = 1,
+                    HScale = 1,
+                    ImageData = image_dummy,
+                };
+
                 foreach (ImageEntry img in shell._images)
                 {
                     string name = img._path != null ?
@@ -62,7 +151,7 @@ namespace HALSysDATViewer.Modeling
                             HSD_MOBJ _mat = new HSD_MOBJ()
                             {
                                 NameOffset = 0,
-                                RenderFlags = RENDER_MODE.XLU | RENDER_MODE.ALPHA_COMPAT | RENDER_MODE.DIFFSE_MAT | RENDER_MODE.DIFFUSE,
+                                RenderFlags = RENDER_MODE.XLU | RENDER_MODE.ALPHA_COMPAT | RENDER_MODE.DIFFSE_MAT,
                                 MaterialColor = new HSD_MCOBJ()
                                 {
                                     AMB_R = 255,
@@ -126,9 +215,10 @@ namespace HALSysDATViewer.Modeling
                                     {
                                         if (newparam._sid == base_sampler2d._sampler2D._source)
                                         {
+                                            _mat.RenderFlags |= RENDER_MODE.TEX0;
                                             _mat.Textures = new HSD_TOBJ()
                                             {
-                                                Flags = TOBJ_FLAGS.COORD_UV | TOBJ_FLAGS.LIGHTMAP_AMBIENT | TOBJ_FLAGS.COLORMAP_BLEND,
+                                                Flags = TOBJ_FLAGS.COORD_UV | TOBJ_FLAGS.LIGHTMAP_DIFFUSE | TOBJ_FLAGS.COLORMAP_ALPHA_MASK,
                                                 Blending = 1f,
                                                 GXTexGenSrc = 4,
                                                 MagFilter = GXTexFilter.GX_LINEAR,
@@ -150,14 +240,29 @@ namespace HALSysDATViewer.Modeling
                                                 WrapT = GXWrapMode.CLAMP,
                                                 WScale = 1,
                                                 HScale = 1,
-                                                ImageData = images[newparam._path],
                                             };
+
+                                            if (images.Count == 0)
+                                            {
+                                                _mat.Textures.ImageData = image_dummy;
+                                            }
+                                            else
+                                            {
+                                                _mat.Textures.ImageData = images[newparam._path];
+                                            }
                                         }
                                     }
                                 }
                             }
+
+                            if (_mat.Textures == null)
+                            {
+                                _mat.RenderFlags |= RENDER_MODE.TEX0;
+                                _mat.Textures = dummy_TOBJ;
+                            }
+
                             _mat.MaterialColor.Shininess = effect._shader._shininess;
-                            _mat.MaterialColor.Alpha = effect._shader._transparency;
+                            //_mat.MaterialColor.Alpha = effect._shader._transparency;
                             materials.Add(material._id, _mat);
                         }
                     }
@@ -181,6 +286,7 @@ namespace HALSysDATViewer.Modeling
 
                     foreach (PrimitiveEntry _prim in geometry._primitives)
                     {
+                        int colorVTX = -1;
                         foreach (InputEntry _input in _prim._inputs)
                         {
                             GXVertexBuffer buffer = new GXVertexBuffer()
@@ -201,6 +307,13 @@ namespace HALSysDATViewer.Modeling
                                 case SemanticType.TEXCOORD:
                                     buffer.Name = GXAttribName.GX_VA_TEX0 + _input._set;
                                     break;
+                                case SemanticType.COLOR:
+                                    continue;
+                                    buffer.Name = GXAttribName.GX_VA_CLR0;
+                                    colorVTX = buffers.Count;
+                                    break;
+                                default:
+                                    continue;
                             }
 
                             //Get Source
@@ -249,6 +362,12 @@ namespace HALSysDATViewer.Modeling
                                                 buffer.CompCount = GXCompCnt.TexS;
                                             else if (source._accessorStride == 2)
                                                 buffer.CompCount = GXCompCnt.TexST;
+                                            break;
+                                        case SemanticType.COLOR:
+                                            if (source._accessorStride == 3)
+                                                buffer.CompCount = GXCompCnt.ClrRGB;
+                                            else if (source._accessorStride == 4)
+                                                buffer.CompCount = GXCompCnt.ClrRGBA;
                                             break;
                                     }
 
@@ -304,6 +423,7 @@ namespace HALSysDATViewer.Modeling
 
                             p.Count = (ushort)_prim._pointCount;
                             p.Indices = new GXIndexGroup[_prim._pointCount];
+
                             for (int i = 0; i < p.Indices.Length; i++)
                                 p.Indices[i] = new GXIndexGroup()
                                 {
@@ -330,7 +450,7 @@ namespace HALSysDATViewer.Modeling
 
                 RootJOBJ = new HSD_JOBJ()
                 {
-                    Flags = JOBJ_FLAG.SKELETON_ROOT | JOBJ_FLAG.CLASSICAL_SCALING | JOBJ_FLAG.ROOT_TEXEDGE | JOBJ_FLAG.ROOT_OPA | JOBJ_FLAG.TEXEDGE,
+                    Flags = JOBJ_FLAG.ENVELOPE_MODEL | JOBJ_FLAG.SKELETON_ROOT | JOBJ_FLAG.CLASSICAL_SCALING | JOBJ_FLAG.ROOT_TEXEDGE | JOBJ_FLAG.TEXEDGE,
                     Transforms = new HSD_Transforms()
                     {
                         TX = 0,
@@ -349,30 +469,50 @@ namespace HALSysDATViewer.Modeling
                 {
                     foreach (NodeEntry node in scene._nodes)
                     {
-                        ProcessNode(RootJOBJ, node, materials, polygons);
+                        ProcessNode(shell, RootJOBJ, node, materials, polygons);
                     }
                 }
             }
         }
 
-        private void ProcessNode(HSD_JOBJ joint, NodeEntry node, Dictionary<string, HSD_MOBJ> materials, Dictionary<string, HSD_POBJ> polygons)
+        private void ProcessNode(DecoderShell shell, HSD_JOBJ joint, NodeEntry node, Dictionary<string, HSD_MOBJ> materials, Dictionary<string, HSD_POBJ> polygons)
         {
             HSD_JOBJ jointChild = new HSD_JOBJ();
             foreach (NodeEntry nodeChild in node._children)
             {
-                ProcessNode(jointChild, nodeChild, materials, polygons);
+                ProcessNode(shell, jointChild, nodeChild, materials, polygons);
             }
 
             //Get first instance of a mesh
             InstanceEntry mesh = new InstanceEntry();
             bool meshFound = false;
+            string materialUrl = "";
+            string meshUrl = "";
             foreach (InstanceEntry instance in node._instances)
             {
+                mesh = instance;
                 if (instance._type == InstanceType.Geometry)
                 {
-                    mesh = instance;
                     meshFound = true;
+                    materialUrl = mesh._material._target;
+                    meshUrl = mesh._url;
                     break;
+                }
+                else if (instance._type == InstanceType.Controller)
+                {
+                    foreach (SkinEntry skin in shell._skins)
+                    {
+                        if (skin._id == mesh._url)
+                        {
+                            meshFound = true;
+                            materialUrl = mesh._material._target;
+                            meshUrl = skin._skinSource;
+                            break;
+                        }
+                    }
+
+                    if (meshFound)
+                        break;
                 }
             }
 
@@ -395,12 +535,13 @@ namespace HALSysDATViewer.Modeling
 
             jointChild.ROBJOffset = 0;
             jointChild.NameOffset = 0;
+            jointChild.Flags = JOBJ_FLAG.CLASSICAL_SCALING | JOBJ_FLAG.SKELETON | JOBJ_FLAG.TEXEDGE;
             if (meshFound)
             {
                 jointChild.DOBJ = new HSD_DOBJ()
                 {
-                    MOBJ = materials[mesh._material._target],
-                    POBJ = polygons[mesh._url],
+                    MOBJ = materials[materialUrl],
+                    POBJ = polygons[meshUrl],
                 };
             }
             joint.AddChild(jointChild);
