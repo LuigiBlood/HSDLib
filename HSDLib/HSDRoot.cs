@@ -48,6 +48,10 @@ namespace HSDLib
             {
                 Node = Reader.ReadObject<KAR_GrData>(Offset);
             }
+            else if (Name.EndsWith("scene_data"))
+            {
+                Node = Reader.ReadObject<HSD_SOBJ>(Offset);
+            }
         }
 
         public override void Save(HSDWriter Writer)

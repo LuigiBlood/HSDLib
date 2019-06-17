@@ -54,6 +54,7 @@
     <Compile Include="Common\HSD_Matrix3x3.cs" />
     <Compile Include="Common\HSD_MOBJ.cs" />
     <Compile Include="Common\HSD_POBJ.cs" />
+    <Compile Include="Common\HSD_SOBJ.cs" />
     <Compile Include="Common\HSD_TOBJ.cs" />
     <Compile Include="Common\HSD_Transforms.cs" />
     <Compile Include="GX\Enums.cs" />
